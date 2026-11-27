@@ -20,7 +20,7 @@ The card expects an entity with these attributes. A [Variable](https://github.co
 | `media_position_updated_at` | ISO date and time |
 | `entity_picture` | URL of the cover |
 
-Empty attributes are not shown. If there is no cover, the theme accent colour is the background.
+Empty attributes are not shown. If there is no cover, the card is compact and its background is the app's brand colour (the theme accent colour for an unknown app). If there is no title, the app name is the title.
 
 ## Install
 

@@ -7,6 +7,13 @@ const ICONS = {
   'Disney+': 'mdi:movie-open-star', 'Prime Video': 'mdi:filmstrip-box', 'HDMI 3': 'mdi:video-input-hdmi',
 };
 
+// Background colour per app, used when there is no cover.
+const BRANDS = {
+  'Plex': '#e5a00d', 'YouTube': '#ff0033', 'Netflix': '#e50914', 'Spotify': '#1db954',
+  'PlayStation 5': '#0070d1', 'Nintendo Switch': '#e60012', 'Apple TV': '#555555',
+  'Disney+': '#113ccf', 'Prime Video': '#00a8e1',
+};
+
 const hms = (s) => {
   s = Math.max(0, Math.floor(s));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
@@ -69,15 +76,24 @@ class TvNowPlayingCard extends HTMLElement {
     const { dur, pos } = this._position(a, st.state);
     const pct = dur ? (pos / dur) * 100 : 0;
     const state = st.state.charAt(0).toUpperCase() + st.state.slice(1);
-    const bg = a.entity_picture ? `background-image:url('${esc(a.entity_picture)}')` : '';
+    // With a cover: cover behind a dark shade, full height. Without: the app's colour, compact.
+    const cover = !!a.entity_picture;
+    const brand = BRANDS[a.app] ?? 'var(--primary-color)';
+    const bg = cover
+      ? `background-image:url('${esc(a.entity_picture)}')`
+      : `background:linear-gradient(120deg, ${brand} 0%, color-mix(in srgb, ${brand} 35%, #000) 100%)`;
+    const minHeight = cover ? Number(this._config.height) : 0;
+    // Without a media title the app name is the title, so it is not shown twice.
+    const title = a.media_title || a.app;
+    const appLabel = a.media_title ? a.app : '';
 
     this.shadowRoot.innerHTML = `
       <style>
-        ha-card { position: relative; overflow: hidden; min-height: ${Number(this._config.height)}px; color: #fff; }
-        .bg { position: absolute; inset: 0; background: var(--primary-color) center 25% / cover no-repeat; transform: scale(1.05); }
-        .shade { position: absolute; inset: 0;
+        ha-card { position: relative; overflow: hidden; min-height: ${minHeight}px; color: #fff; }
+        .bg { position: absolute; inset: 0; background: center 25% / cover no-repeat; transform: scale(1.05); }
+        .shade { position: absolute; inset: 0; display: ${cover ? 'block' : 'none'};
                  background: linear-gradient(90deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.6) 55%, rgba(0,0,0,.25) 100%); }
-        .info { position: relative; padding: 14px 16px; min-height: ${Number(this._config.height)}px; box-sizing: border-box;
+        .info { position: relative; padding: 14px 16px; min-height: ${minHeight}px; box-sizing: border-box;
                 display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
         .app { display: flex; align-items: center; gap: 6px; font-size: .9em; opacity: .9; }
         .app ha-icon { --mdc-icon-size: 18px; }
@@ -96,10 +112,10 @@ class TvNowPlayingCard extends HTMLElement {
         <div class="info">
           <div class="app">
             <ha-icon icon="${esc(ICONS[a.app] ?? 'mdi:television-play')}"></ha-icon>
-            <span>${esc(a.app)}</span>
+            <span>${esc(appLabel)}</span>
             <span class="badge">${esc(state)}</span>
           </div>
-          <div class="title">${esc(a.media_title || a.app)}</div>
+          <div class="title">${esc(title)}</div>
           ${sub ? `<div class="sub">${esc(sub)}</div>` : ''}
           ${dur ? `<div class="row"><div class="bar"><div class="fill" style="width:${pct}%"></div></div>
                    <div class="time">${hms(pos)} / ${hms(dur)}</div></div>` : ''}
