@@ -1,2 +1,19 @@
+# Every text file uses LF, on every system. Git changes nothing on checkout or commit.
 * text=auto eol=lf
+
+# Windows batch files need CRLF to run.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Files that are never text.
 *.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.webp binary
+*.zip binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

@@ -1,13 +1,20 @@
+# Dependabot opens a pull request each week for every update, so CI checks it before it is merged.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: chore
+      include: scope
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: chore
+      include: scope
     groups:
-      dev-dependencies:
-        dependency-type: development
+      minor-and-patch:
+        update-types: [minor, patch]
