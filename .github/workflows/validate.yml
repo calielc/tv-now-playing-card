@@ -1,0 +1,24 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hacs/action@main
+        with:
+          category: plugin
+          # HACS reads the licence of the default branch, so a pull request cannot change that result.
+          # Pull requests skip it; the runs on main and the weekly run check it.
+          ignore: ${{ github.event_name == 'pull_request' && 'brands license' || 'brands' }}

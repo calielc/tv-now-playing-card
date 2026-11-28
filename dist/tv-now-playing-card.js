@@ -1,26 +1,47 @@
 // tv-now-playing-card: what the living room TV is playing, from var.living_room_tv.
 // Cover as the card background, text and progress on top.
 // Config: { type: custom:tv-now-playing-card, entity: var.living_room_tv, height: 140 }
+const VERSION = '0.0.0-dev'; // The release workflow stamps the real version.
+
 const ICONS = {
-  'Plex': 'mdi:plex', 'YouTube': 'mdi:youtube', 'Netflix': 'mdi:netflix', 'Spotify': 'mdi:spotify',
-  'PlayStation 5': 'mdi:sony-playstation', 'Nintendo Switch': 'mdi:nintendo-switch', 'Apple TV': 'mdi:apple',
-  'Disney+': 'mdi:movie-open-star', 'Prime Video': 'mdi:filmstrip-box', 'HDMI 3': 'mdi:video-input-hdmi',
+  Plex: 'mdi:plex',
+  YouTube: 'mdi:youtube',
+  Netflix: 'mdi:netflix',
+  Spotify: 'mdi:spotify',
+  'PlayStation 5': 'mdi:sony-playstation',
+  'Nintendo Switch': 'mdi:nintendo-switch',
+  'Apple TV': 'mdi:apple',
+  'Disney+': 'mdi:movie-open-star',
+  'Prime Video': 'mdi:filmstrip-box',
+  'HDMI 3': 'mdi:video-input-hdmi',
 };
 
 // Background colour per app, used when there is no cover.
 const BRANDS = {
-  'Plex': '#e5a00d', 'YouTube': '#ff0033', 'Netflix': '#e50914', 'Spotify': '#1db954',
-  'PlayStation 5': '#0070d1', 'Nintendo Switch': '#e60012', 'Apple TV': '#555555',
-  'Disney+': '#113ccf', 'Prime Video': '#00a8e1',
+  Plex: '#e5a00d',
+  YouTube: '#ff0033',
+  Netflix: '#e50914',
+  Spotify: '#1db954',
+  'PlayStation 5': '#0070d1',
+  'Nintendo Switch': '#e60012',
+  'Apple TV': '#555555',
+  'Disney+': '#113ccf',
+  'Prime Video': '#00a8e1',
 };
 
 const hms = (s) => {
   s = Math.max(0, Math.floor(s));
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  const h = Math.floor(s / 3600),
+    m = Math.floor((s % 3600) / 60),
+    sec = s % 60;
   return `${h ? h + ':' + String(m).padStart(2, '0') : m}:${String(sec).padStart(2, '0')}`;
 };
 
-const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const esc = (v) =>
+  String(v ?? '').replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+  );
 
 class TvNowPlayingCard extends HTMLElement {
   setConfig(config) {
@@ -39,8 +60,12 @@ class TvNowPlayingCard extends HTMLElement {
     }
   }
 
-  connectedCallback() { this._timer = setInterval(() => this._tick(), 1000); }
-  disconnectedCallback() { clearInterval(this._timer); }
+  connectedCallback() {
+    this._timer = setInterval(() => this._tick(), 1000);
+  }
+  disconnectedCallback() {
+    clearInterval(this._timer);
+  }
 
   _position(a, state) {
     const dur = Number(a.media_duration) || 0;
@@ -66,13 +91,16 @@ class TvNowPlayingCard extends HTMLElement {
       this.shadowRoot.innerHTML = `<ha-card><div style="padding:16px">Entity not found</div></ha-card>`;
       return;
     }
-    const a = st.attributes;
+    // `app` (var/template entities) or `app_name` (media_player entities), else the entity name.
+    const a = { ...st.attributes, app: st.attributes.app || st.attributes.app_name || st.attributes.friendly_name };
     const sub = [
       a.media_series_title,
       a.media_season && a.media_episode ? `S${a.media_season}E${a.media_episode}` : '',
       a.media_artist,
       a.media_album_name,
-    ].filter(Boolean).join(' · ');
+    ]
+      .filter(Boolean)
+      .join(' · ');
     const { dur, pos } = this._position(a, st.state);
     const pct = dur ? (pos / dur) * 100 : 0;
     const state = st.state.charAt(0).toUpperCase() + st.state.slice(1);
@@ -117,16 +145,35 @@ class TvNowPlayingCard extends HTMLElement {
           </div>
           <div class="title">${esc(title)}</div>
           ${sub ? `<div class="sub">${esc(sub)}</div>` : ''}
-          ${dur ? `<div class="row"><div class="bar"><div class="fill" style="width:${pct}%"></div></div>
-                   <div class="time">${hms(pos)} / ${hms(dur)}</div></div>` : ''}
+          ${
+            dur
+              ? `<div class="row"><div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+                   <div class="time">${hms(pos)} / ${hms(dur)}</div></div>`
+              : ''
+          }
         </div>
       </ha-card>`;
   }
 
-  getCardSize() { return 3; }
-  getGridOptions() { return { columns: 'full', rows: 'auto' }; }
+  getCardSize() {
+    return 3;
+  }
+  getGridOptions() {
+    return { columns: 'full', rows: 'auto' };
+  }
 }
 
-if (!customElements.get('tv-now-playing-card')) customElements.define('tv-now-playing-card', TvNowPlayingCard);
+if (!customElements.get('tv-now-playing-card')) {
+  customElements.define('tv-now-playing-card', TvNowPlayingCard);
+  console.info(
+    `%c TV-NOW-PLAYING-CARD %c ${VERSION} `,
+    'color:#fff;background:#c2410c;font-weight:600',
+    'color:#c2410c',
+  );
+}
 window.customCards = window.customCards || [];
-window.customCards.push({ type: 'tv-now-playing-card', name: 'TV now playing', description: 'Cover as background, title, app and progress from var.living_room_tv' });
+window.customCards.push({
+  type: 'tv-now-playing-card',
+  name: 'TV now playing',
+  description: 'Cover as background, title, app and progress from var.living_room_tv',
+});

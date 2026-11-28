@@ -1,0 +1,29 @@
+name: Bug report
+description: Something is wrong with the card
+body:
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Card version
+      description: The browser console shows it when the card loads (`TV-NOW-PLAYING-CARD x.y.z`).
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, what you saw, and a screenshot if it is a layout problem.
+    validations:
+      required: true
+  - type: textarea
+    id: state
+    attributes:
+      label: Entity state
+      description: The state and attributes of the entity, from Developer tools > States.
+      render: yaml
