@@ -1,0 +1,27 @@
+{
+  "name": "tv-now-playing-card",
+  "version": "0.0.0",
+  "description": "Home Assistant Lovelace card: what the TV is playing, cover as background, title, app and live progress bar",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calielc/tv-now-playing-card.git"
+  },
+  "scripts": {
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.16.0",
+    "globals": "^17.14.0",
+    "happy-dom": "^21.0.4",
+    "prettier": "^3.10.1"
+  }
+}

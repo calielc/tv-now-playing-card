@@ -1,0 +1,62 @@
+name: Release
+
+# Each push to main (a merged pull request) makes a release with a new version and tag.
+# The commit types decide: feat = minor, "!" or BREAKING CHANGE = major, anything else = patch.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - id: next
+        run: node scripts/release-version.js
+
+      - name: Stamp the version into the card
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          mkdir -p release
+          sed "s/^const VERSION = '[^']*';/const VERSION = '${VERSION}';/" dist/tv-now-playing-card.js > release/tv-now-playing-card.js
+          grep -q "const VERSION = '${VERSION}';" release/tv-now-playing-card.js
+
+      - name: Write the release notes
+        env:
+          PREVIOUS: ${{ steps.next.outputs.previous }}
+        run: |
+          range="${PREVIOUS:+${PREVIOUS}..}HEAD"
+          {
+            echo "## Changes"
+            echo
+            git log --no-merges --pretty='- %s' "${range}"
+          } > notes.md
+          cat notes.md
+
+      - name: Create the release
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          gh release create "v${VERSION}" release/tv-now-playing-card.js \
+            --target "${GITHUB_SHA}" \
+            --title "v${VERSION}" \
+            --notes-file notes.md \
+            --latest
