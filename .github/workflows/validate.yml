@@ -19,4 +19,6 @@ jobs:
       - uses: hacs/action@main
         with:
           category: plugin
-          ignore: brands
+          # HACS reads the licence of the default branch, so a pull request cannot change that result.
+          # Pull requests skip it; the runs on main and the weekly run check it.
+          ignore: ${{ github.event_name == 'pull_request' && 'brands license' || 'brands' }}
