@@ -1,5 +1,6 @@
 name: Validate
 
+# The HACS action checks that HACS can install the card.
 on:
   push:
     branches: [main]
@@ -19,6 +20,6 @@ jobs:
       - uses: hacs/action@main
         with:
           category: plugin
-          # HACS reads the licence of the default branch, so a pull request cannot change that result.
-          # Pull requests skip it; the runs on main and the weekly run check it.
+          # The repository is not in the home-assistant/brands list. HACS reads the licence of the default branch,
+          # so a pull request cannot change that result: pull requests skip it, main and the weekly run check it.
           ignore: ${{ github.event_name == 'pull_request' && 'brands license' || 'brands' }}
